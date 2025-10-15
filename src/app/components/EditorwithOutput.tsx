@@ -3,11 +3,13 @@
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import Editor from "@monaco-editor/react";
-import { Sun, Moon, Link as LinkIcon, Code, Monitor } from "lucide-react";
-import "../globals.css"; // your CSS file
+import { Sun, Moon } from "lucide-react";
+import "../globals.css";
+
+const BASE_URL = "https://codivir-backend.onrender.com"; // Render backend
+
 
 interface EditorComponentProps {
-  initialCode: string;
   snippetId?: string | null;
   onSnippetIdChange?: (id: string) => void;
 }
@@ -18,7 +20,8 @@ export default function EditorComponent({
 }: EditorComponentProps) {
   // Default Templates for Each Language
   const defaultTemplates: Record<string, string> = {
-    html: `<html>
+  html: `
+<html>
   <head>
     <title>HTML Sample</title>
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
@@ -34,7 +37,8 @@ export default function EditorComponent({
     <input disabled type="button" value="Click me" />
   </body>
 </html>`,
-    css: `/* CSS Sample */
+
+  css: `/* CSS Sample */
 body { 
   background-color: #f0f0f0;
   font-family: Arial,
@@ -43,8 +47,15 @@ h1 {
   color: #cca3a3;
   text-align: center;
 }
-button { background-color: #cca3a3; color: white; border: none; padding: 8px 12px; cursor: pointer; }`,
-    javascript: `// JavaScript Sample
+button {
+  background-color: #cca3a3;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  cursor: pointer;
+}`,
+
+  javascript: `// JavaScript Sample
 const heading = document.createElement("h1");
 heading.textContent = "Hello JavaScript!";
 heading.style.color = "#cca3a3";
@@ -54,7 +65,8 @@ const btn = document.createElement("button");
 btn.textContent = "Click me";
 btn.disabled = true;
 document.body.appendChild(btn);`,
-    python: `# Python Sample
+
+  python: `# Python Sample
 class Person:
     def __init__(self, name: str, age: int):
         self.name = name
@@ -65,7 +77,164 @@ class Person:
 
 p = Person("Alice", 25)
 p.greet()`,
-  };
+  dart: `// Dart sample
+void main() {
+  final name = 'Dart';
+  print('Hello from $name!');
+}`,
+
+  julia: `# Julia sample
+struct Person
+  name::String
+  age::Int
+end
+
+hello(p::Person) = println("Hello, my name is $(p.name) and I'm $(p.age) years old.")
+
+p = Person("Alice", 25)
+hello(p)`,
+
+  ruby: `# Ruby sample
+class Person
+  attr_accessor :name, :age
+  def initialize(name, age)
+    @name = name
+    @age = age
+  end
+
+  def greet
+    puts "Hello, I'm #{@name}, #{@age} years old."
+  end
+end
+
+p = Person.new('Alice', 25)
+p.greet`,
+
+  java: `// Java sample
+public class Main {
+  static class Person {
+    String name;
+    int age;
+    Person(String n, int a) { name = n; age = a; }
+    void greet() { System.out.println("Hello, I'm " + name + ", " + age + " years old."); }
+  }
+
+  public static void main(String[] args) {
+    Person p = new Person("Alice", 25);
+    p.greet();
+  }
+}`,
+
+  elixir: `# Elixir sample
+defmodule Person do
+  defstruct name: "", age: 0
+
+  def greet(%Person{name: name, age: age}) do
+    IO.puts("Hello, I'm #{name}, #{age} years old.")
+  end
+end
+
+p = %Person{name: "Alice", age: 25}
+Person.greet(p)`,
+
+  go: `// Go sample
+package main
+
+import "fmt"
+
+type Person struct {
+  Name string
+  Age  int
+}
+
+func (p Person) Greet() {
+  fmt.Printf("Hello, I'm %s, %d years old.\\n", p.Name, p.Age)
+}
+
+func main() {
+  p := Person{"Alice", 25}
+  p.Greet()
+}`,
+
+  php: `<?php
+// PHP sample
+class Person {
+  public $name;
+  public $age;
+  function __construct($name, $age) {
+    $this->name = $name;
+    $this->age = $age;
+  }
+  function greet() {
+    echo "Hello, I'm {$this->name}, {$this->age} years old.\\n";
+  }
+}
+
+$p = new Person("Alice", 25);
+$p->greet();
+?>`,
+
+  kotlin: `// Kotlin sample
+data class Person(val name: String, val age: Int) {
+  fun greet() = println("Hello, I'm $name, $age years old.")
+}
+
+fun main() {
+  val p = Person("Alice", 25)
+  p.greet()
+}`,
+
+  swift: `// Swift sample
+struct Person {
+  var name: String
+  var age: Int
+  func greet() {
+    print("Hello, I'm \\(name), \\(age) years old.")
+  }
+}
+
+let p = Person(name: "Alice", age: 25)
+p.greet()`,
+
+  rust: `// Rust sample
+struct Person {
+  name: String,
+  age: u8,
+}
+
+impl Person {
+  fn greet(&self) {
+    println!("Hello, I'm {}, {} years old.", self.name, self.age);
+  }
+}
+
+fn main() {
+  let p = Person { name: String::from("Alice"), age: 25 };
+  p.greet();
+}`,
+
+  typescript: `// TypeScript sample
+type Person = { name: string; age: number };
+
+function greet(p: Person) {
+  console.log(\`Hello, I'm \${p.name}, \${p.age} years old.\`);
+}
+
+const p: Person = { name: "Alice", age: 25 };
+greet(p);`,
+
+  sql: `-- SQL sample (SQLite)
+CREATE TABLE IF NOT EXISTS persons (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  name TEXT NOT NULL,
+  age INTEGER NOT NULL
+);
+
+INSERT INTO persons (name, age) VALUES ('Alice', 25);
+
+SELECT * FROM persons;`
+};
+
 
   const [codes, setCodes] = useState<Record<string, string>>({
     html: defaultTemplates.html,
@@ -81,54 +250,50 @@ p.greet()`,
   const [isTyping, setIsTyping] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
-  const [showOutput, setShowOutput] = useState(false); // for mobile toggle
-
   const typingTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const handleChange = (value?: string) => {
     setCodes((prev) => ({ ...prev, [language]: value || "" }));
     setIsEdited(true);
     setIsTyping(true);
-
     if (typingTimeout.current) clearTimeout(typingTimeout.current);
     typingTimeout.current = setTimeout(() => setIsTyping(false), 2000);
   };
 
-  const handleShare = async () => {
-    try {
-      const payload = { codes, language, theme: darkMode ? "dark" : "light" };
-
-      const res = await fetch(
-        snippetId ? `/api/snippets/${snippetId}` : "/api/snippets",
-        {
-          method: snippetId ? "PUT" : "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        }
-      );
-
-      if (!res.ok) throw new Error("Failed to save snippet");
-      const data = await res.json();
-
-      if (data.id) {
-        setSnippetId(data.id);
-        onSnippetIdChange?.(data.id);
+const handleShareAndCopy = async () => {
+  try {
+    // 1️⃣ Share snippet (POST or PUT)
+    const payload = { codes, language, theme: darkMode ? "dark" : "light" };
+    const res = await fetch(
+      snippetId 
+        ? `${BASE_URL}/api/snippets/${snippetId}` 
+        : `${BASE_URL}/api/snippets`,   // ← use BASE_URL here
+      {
+        method: snippetId ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       }
-
-      setIsEdited(false);
-    } catch (err) {
-      console.error("Error sharing snippet:", err);
-    }
-  };
-
-  const handleCopyLink = () => {
-    if (!snippetId) return;
-    navigator.clipboard.writeText(
-      `${window.location.origin}/snippet/${snippetId}`
     );
-    setShowPopup(true);
-    setTimeout(() => setShowPopup(false), 2000);
-  };
+
+
+    if (!res.ok) throw new Error("Failed to save snippet");
+
+    const data = await res.json();
+    if (data.id) {
+      setSnippetId(data.id);
+      onSnippetIdChange?.(data.id);
+
+      // 2️⃣ Copy link to clipboard
+      navigator.clipboard.writeText(`${window.location.origin}/snippet/${data.id}`);
+      setShowPopup(true);
+      setTimeout(() => setShowPopup(false), 2000);
+    }
+
+    setIsEdited(false);
+  } catch (err) {
+    console.error("Error sharing snippet:", err);
+  }
+};
 
   const toggleTheme = () => {
     setDarkMode(!darkMode);
@@ -138,35 +303,32 @@ p.greet()`,
   const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newLang = e.target.value;
     setLanguage(newLang);
-
-    if (!isEdited && !codes[newLang]) {
-      setCodes((prev) => ({ ...prev, [newLang]: defaultTemplates[newLang] }));
-    }
+    if (!codes[newLang]) setCodes((prev) => ({ ...prev, [newLang]: defaultTemplates[newLang] || "" }));
   };
 
-  // Auto-refresh per language
+  // Auto-refresh from remote MySQL backend
   useEffect(() => {
     if (!snippetId) return;
     const interval = setInterval(async () => {
       if (isTyping) return;
-
       try {
-        const res = await fetch(`/api/snippets/${snippetId}`);
+        const res = await fetch(`${BASE_URL}/api/snippets/${snippetId}`);
         if (!res.ok) return;
         const data = await res.json();
-
-        // Ensure backend returns codes object
         if (data.codes && data.codes[language] !== codes[language]) {
           setCodes((prev) => ({ ...prev, [language]: data.codes[language] }));
         }
         if (data.language && data.language !== language) {
           setLanguage(data.language);
         }
+        if (data.theme) {
+          setDarkMode(data.theme === "dark");
+          document.documentElement.classList.toggle("dark", data.theme === "dark");
+        }
       } catch (err) {
         console.error(err);
       }
     }, 3000);
-
     return () => clearInterval(interval);
   }, [snippetId, language, isTyping, codes]);
 
@@ -193,26 +355,14 @@ p.greet()`,
           />
           <div className="editor-header-right">
             {snippetId && (
-              <button className="editor-link-btn" onClick={handleCopyLink}>
-                <LinkIcon size={18} />
-              </button>
-            )}
-
             <button
-              onClick={() => setShowOutput(!showOutput)}
-              className="p-2 border rounded hover:bg-gray-200 dark:hover:bg-gray-700"
-              title="Toggle Output (Mobile)"
-            >
-              {showOutput ? <Code size={18} /> : <Monitor size={18} />}
-            </button>
-
-            <button
-              onClick={handleShare}
+              onClick={ handleShareAndCopy }
               disabled={!isEdited && !!snippetId}
               className={`editor-share-btn ${isEdited ? "active" : "disabled"}`}
             >
               Share
             </button>
+            )}
           </div>
         </header>
 
@@ -225,50 +375,48 @@ p.greet()`,
         />
 
         {/* Output Pane */}
-{/* Output Pane */}
-<div className="output-pane">
-  {language === "html" || language === "css" || language === "javascript" ? (
-    <iframe
-      key={language + codes[language]}
-      className="output-iframe"
-      sandbox="allow-scripts"
-      srcDoc={`
-        <html>
-          <head>
-            <style>${codes.css}</style>
-          </head>
-          <body>
-            ${codes.html}
-            <script>${codes.javascript}<\/script>
-          </body>
-        </html>
-      `}
-    />
-  ) : language === "typescript" ? (
-    <iframe
-      key={codes.typescript}
-      className="output-iframe"
-      sandbox="allow-scripts"
-      srcDoc={`
-        <html>
-          <body>
-            <script type="module">
-              ${codes.typescript.replace(
-                /^/,
-                "console.log('Running TypeScript output simulation...');"
-              )}
-            <\/script>
-          </body>
-        </html>
-      `}
-    />
-  ) : (
-    <div className="output-text">
-      <pre>{codes.python}</pre>
-    </div>
-  )}
-</div>
-
+        <div className="output-pane">
+          {language === "html" || language === "css" || language === "javascript" ? (
+            <iframe
+              key={language + codes[language]}
+              className="output-iframe"
+              sandbox="allow-scripts"
+              srcDoc={`
+                <html>
+                  <head>
+                    <style>${codes.css}</style>
+                  </head>
+                  <body>
+                    ${codes.html}
+                    <script>${codes.javascript}<\/script>
+                  </body>
+                </html>
+              `}
+            />
+          ) : language === "typescript" ? (
+            <iframe
+              key={codes.typescript}
+              className="output-iframe"
+              sandbox="allow-scripts"
+              srcDoc={`
+                <html>
+                  <body>
+                    <script type="module">
+                      ${codes.typescript.replace(
+                        /^/,
+                        "console.log('Running TypeScript output simulation...');"
+                      )}
+                    <\/script>
+                  </body>
+                </html>
+              `}
+            />
+          ) : (
+            <div className="output-text">
+              <pre>{codes.python}</pre>
+            </div>
+          )}
+        </div>
 
         <footer
           className={`editor-footer ${
@@ -291,6 +439,18 @@ p.greet()`,
             <option value="css">CSS</option>
             <option value="javascript">JavaScript</option>
             <option value="python">Python</option>
+            <option value="dart">Dart</option>
+            <option value="julia">Julia</option>
+            <option value="ruby">Ruby</option>
+            <option value="java">Java</option>
+            <option value="elixir">Elixir</option>
+            <option value="go">Go</option>
+            <option value="php">PHP</option>
+            <option value="kotlin">Kotlin</option>
+            <option value="swift">Swift</option>
+            <option value="rust">Rust</option>
+            <option value="typescript">TypeScript</option>
+            <option value="sql">SQL</option>
           </select>
         </footer>
 

@@ -1,11 +1,7 @@
 import EditorComponent from "../../components/EditorComponent";
 
-export default async function SnippetPage({
-  params,
-}: {
-  params: Promise<{ id: string }>; // ✅ params is a Promise
-}) {
-  const { id: snippetId } = await params; // ✅ await before using
+export default function SnippetPage({ params }: { params: { id: string } }) {
+  const { id: snippetId } = params;
 
-  return <EditorComponent initialCode="" snippetId={snippetId} />;
+  return <EditorComponent snippetId={snippetId} />;
 }

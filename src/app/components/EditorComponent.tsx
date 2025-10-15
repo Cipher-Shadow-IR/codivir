@@ -3,11 +3,13 @@
 import Image from "next/image";
 import { useState, useEffect, useRef } from "react";
 import Editor from "@monaco-editor/react";
-import { Sun, Moon, Link as LinkIcon } from "lucide-react";
-import "../globals.css"; // your CSS file
+import { Sun, Moon } from "lucide-react";
+import "../globals.css";
+
+const BASE_URL = "https://codivir-backend.onrender.com"; // Render backend
+
 
 interface EditorComponentProps {
-  initialCode: string;
   snippetId?: string | null;
   onSnippetIdChange?: (id: string) => void;
 }
@@ -16,7 +18,6 @@ export default function EditorComponent({
   snippetId: propSnippetId = null,
   onSnippetIdChange,
 }: EditorComponentProps) {
-  // Default Templates for Each Language
   const defaultTemplates: Record<string, string> = {
   html: `
 <html>
@@ -248,53 +249,50 @@ SELECT * FROM persons;`
   const [isTyping, setIsTyping] = useState(false);
   const [darkMode, setDarkMode] = useState(false);
   const [showPopup, setShowPopup] = useState(false);
-
   const typingTimeout = useRef<NodeJS.Timeout | null>(null);
 
   const handleChange = (value?: string) => {
     setCodes((prev) => ({ ...prev, [language]: value || "" }));
     setIsEdited(true);
     setIsTyping(true);
-
     if (typingTimeout.current) clearTimeout(typingTimeout.current);
     typingTimeout.current = setTimeout(() => setIsTyping(false), 2000);
   };
 
-  const handleShare = async () => {
-    try {
-      const payload = { codes, language, theme: darkMode ? "dark" : "light" };
-
-      const res = await fetch(
-        snippetId ? `/api/snippets/${snippetId}` : "/api/snippets",
-        {
-          method: snippetId ? "PUT" : "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload),
-        }
-      );
-
-      if (!res.ok) throw new Error("Failed to save snippet");
-      const data = await res.json();
-
-      if (data.id) {
-        setSnippetId(data.id);
-        onSnippetIdChange?.(data.id);
+const handleShareAndCopy = async () => {
+  try {
+    // 1️⃣ Share snippet (POST or PUT)
+    const payload = { codes, language, theme: darkMode ? "dark" : "light" };
+    const res = await fetch(
+      snippetId 
+        ? `${BASE_URL}/api/snippets/${snippetId}` 
+        : `${BASE_URL}/api/snippets`,   // ← use BASE_URL here
+      {
+        method: snippetId ? "PUT" : "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
       }
-
-      setIsEdited(false);
-    } catch (err) {
-      console.error("Error sharing snippet:", err);
-    }
-  };
-
-  const handleCopyLink = () => {
-    if (!snippetId) return;
-    navigator.clipboard.writeText(
-      `${window.location.origin}/snippet/${snippetId}`
     );
-    setShowPopup(true);
-    setTimeout(() => setShowPopup(false), 2000);
-  };
+
+
+    if (!res.ok) throw new Error("Failed to save snippet");
+
+    const data = await res.json();
+    if (data.id) {
+      setSnippetId(data.id);
+      onSnippetIdChange?.(data.id);
+
+      // 2️⃣ Copy link to clipboard
+      navigator.clipboard.writeText(`${window.location.origin}/snippet/${data.id}`);
+      setShowPopup(true);
+      setTimeout(() => setShowPopup(false), 2000);
+    }
+
+    setIsEdited(false);
+  } catch (err) {
+    console.error("Error sharing snippet:", err);
+  }
+};
 
   const toggleTheme = () => {
     setDarkMode(!darkMode);
@@ -304,37 +302,35 @@ SELECT * FROM persons;`
   const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newLang = e.target.value;
     setLanguage(newLang);
-
-    if (!isEdited && !codes[newLang]) {
-      setCodes((prev) => ({ ...prev, [newLang]: defaultTemplates[newLang] }));
-    }
+    if (!codes[newLang]) setCodes((prev) => ({ ...prev, [newLang]: defaultTemplates[newLang] || "" }));
   };
 
-  // Auto-refresh per language
+  // Auto-refresh from remote MySQL backend
   useEffect(() => {
     if (!snippetId) return;
     const interval = setInterval(async () => {
       if (isTyping) return;
-
       try {
-        const res = await fetch(`/api/snippets/${snippetId}`);
+        const res = await fetch(`${BASE_URL}/api/snippets/${snippetId}`);
         if (!res.ok) return;
         const data = await res.json();
-
-        // Ensure backend returns codes object
         if (data.codes && data.codes[language] !== codes[language]) {
           setCodes((prev) => ({ ...prev, [language]: data.codes[language] }));
         }
         if (data.language && data.language !== language) {
           setLanguage(data.language);
         }
+        if (data.theme) {
+          setDarkMode(data.theme === "dark");
+          document.documentElement.classList.toggle("dark", data.theme === "dark");
+        }
       } catch (err) {
         console.error(err);
       }
     }, 3000);
-
     return () => clearInterval(interval);
   }, [snippetId, language, isTyping, codes]);
+
 
   return (
     <main className="main-bg">
@@ -345,9 +341,7 @@ SELECT * FROM persons;`
       >
         <header
           className={`editor-header ${
-            darkMode
-              ? "bg-gray-900 border-gray-700"
-              : "bg-gray-100 border-gray-300"
+            darkMode ? "bg-gray-900 border-gray-700" : "bg-gray-100 border-gray-300"
           }`}
         >
           <Image
@@ -358,20 +352,16 @@ SELECT * FROM persons;`
             className="editor-title"
           />
           <div className="editor-header-right">
-            {snippetId && (
-              <button className="editor-link-btn" onClick={handleCopyLink}>
-                <LinkIcon size={18} />
-              </button>
-            )}
             <button
-              onClick={handleShare}
-              disabled={!isEdited && !!snippetId}
+              onClick={handleShareAndCopy}
+              disabled={!isEdited} // only clickable if edited
               className={`editor-share-btn ${isEdited ? "active" : "disabled"}`}
             >
               Share
             </button>
           </div>
         </header>
+
 
         <Editor
           height="80vh"
