@@ -1,0 +1,239 @@
+/* =======================================================
+   GLOBAL STYLESHEET – Tailwind + Custom UI Enhancements
+   ======================================================= */
+
+@import "tailwindcss";
+
+/* === Main Background Layout === */
+.main-bg {
+  background: url("../../public/resources/main-bg.jpg") center/cover no-repeat;
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1rem;
+}
+
+/* === Editor Container === */
+.editor {
+  background-color: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px);
+  border-radius: 1rem;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+  width: 100%;
+  max-width: 1100px;
+  overflow: hidden;
+  transition: all 0.3s ease;
+}
+
+/* === Header & Footer Base === */
+.editor-header,
+.editor-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.25rem;
+  border-color: #e5e7eb; /* gray-200 */
+}
+
+/* === Title === */
+.editor-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #1f2937; /* gray-800 */
+}
+
+/* === Share Button === */
+.editor-share-btn {
+  padding: 0.5rem 1.25rem;
+  border-radius: 0.5rem;
+  font-weight: 500;
+  color: #fff;
+  transition: background-color 0.2s ease;
+}
+
+.editor-share-btn.active {
+  background-color: #7c3aed; /* purple-600 */
+}
+
+.editor-share-btn.active:hover {
+  background-color: #6d28d9; /* purple-700 */
+}
+
+.editor-share-btn.disabled {
+  background-color: #9ca3af; /* gray-400 */
+  cursor: not-allowed;
+}
+
+/* === Code Editor (Monaco) === */
+.monaco-editor {
+  border-top: 1px solid #e5e7eb;
+}
+
+/* =======================================================
+   OUTPUT SECTION STYLING
+   ======================================================= */
+
+.output-pane {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid #d1d5db;
+  background-color: #f9fafb;
+  transition: all 0.3s ease-in-out;
+}
+
+.dark .output-pane {
+  border-color: #374151;
+  background-color: #111827;
+}
+
+.output-iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+  border-top: 1px solid #d1d5db;
+  background-color: #fff;
+  border-radius: 0 0 0.5rem 0.5rem;
+}
+
+.output-text {
+  padding: 1rem;
+  overflow: auto;
+  color: #1f2937;
+  background-color: #f3f4f6;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.95rem;
+  line-height: 1.5;
+  border-radius: 0.5rem;
+  white-space: pre-wrap;
+  word-wrap: break-word;
+  transition: background-color 0.3s ease;
+}
+
+.dark .output-text {
+  color: #f9fafb;
+  background-color: #1f2937;
+}
+
+/* =======================================================
+   FOOTER SECTION
+   ======================================================= */
+
+.editor-footer {
+  border-top: 1px solid #e5e7eb;
+  background-color: #fff;
+  transition: background-color 0.3s, border-color 0.3s;
+}
+
+/* Dark Mode Footer */
+.dark .editor-footer {
+  background-color: #1f2937; /* gray-900 */
+  border-color: #374151;     /* gray-700 */
+}
+
+/* === Theme Toggle Button === */
+.footer-theme-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.35rem 0.75rem;
+  border-radius: 0.375rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  background-color: #e5e7eb; /* gray-200 */
+  color: #1f2937;            /* gray-800 */
+  cursor: pointer;
+  transition: all 0.2s ease-in-out;
+}
+
+.dark .footer-theme-btn {
+  background-color: #374151; /* gray-800 */
+  color: #f9fafb;            /* gray-100 */
+}
+
+.footer-theme-btn:hover {
+  background-color: #d1d5db; /* gray-300 */
+}
+
+.dark .footer-theme-btn:hover {
+  background-color: #4b5563; /* gray-700 */
+}
+
+/* === Language Selector === */
+.footer-language-select {
+  padding: 0.35rem 0.75rem;
+  border-radius: 0.375rem;
+  background-color: #e5e7eb; /* gray-200 */
+  color: #1f2937;            /* gray-800 */
+  font-size: 0.875rem;
+  cursor: pointer;
+  outline: none;
+  transition: all 0.2s ease-in-out;
+  max-height: 10rem; /* around 5 visible options */
+  overflow-y: auto;
+  scrollbar-width: thin; /* Firefox support */
+  scrollbar-color: rgba(100, 100, 100, 0.4) transparent;
+}
+
+/* Chrome, Edge, Safari scrollbar style */
+.footer-language-select::-webkit-scrollbar {
+  width: 6px;
+}
+
+.footer-language-select::-webkit-scrollbar-thumb {
+  background-color: rgba(100, 100, 100, 0.4);
+  border-radius: 4px;
+}
+
+.footer-language-select:hover::-webkit-scrollbar-thumb {
+  background-color: rgba(100, 100, 100, 0.6);
+}
+
+.dark .footer-language-select {
+  background-color: #374151; /* gray-800 */
+  color: #f9fafb;            /* gray-100 */
+}
+
+/* =======================================================
+   POPUP OVERLAY
+   ======================================================= */
+.popup-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  backdrop-filter: blur(6px);
+}
+
+.popup-content {
+  background: #fff;
+  padding: 1.5rem 2rem;
+  border-radius: 12px;
+  font-weight: 500;
+  color: #333;
+  text-align: center;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+  animation: popupFade 0.3s ease;
+}
+
+@keyframes popupFade {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* =======================================================
+   GLOBAL ANIMATION & INTERACTION
+   ======================================================= */
+* {
+  transition: all 0.2s ease-in-out;
+}
