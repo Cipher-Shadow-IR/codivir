@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <img src="https://readme-typing-svg.herokuapp.com?font=Cambria&size=28&duration=5000&color=00FFFF&center=true&vCenter=true&width=1000&height=70&lines=CODIVIR+-+Collaborative+Code+Sharing+Platform;Real-time+Multi-Language+Compiler;Built+with+Next.js,+TypeScript+%26+SQLite" alt="Typing SVG" />
+  <img src="https://readme-typing-svg.herokuapp.com?font=Cambria&size=28&duration=5000&color=00FFFF&center=true&vCenter=true&width=1000&height=70&lines=CODIVIR+-+Collaborative+Code+Sharing+Platform;Real-time+Multi-Language+Compiler;Powered+by+Next.js+15+%26+Liveblocks" alt="Typing SVG" />
 </p>
 
 <h2 align="center">💻 Code. Collaborate. Share. Instantly.</h2>
@@ -11,10 +11,10 @@
 ---
 
 <p align="center">
-  <img src="https://img.shields.io/badge/Next.js-Frontend-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" />
+  <img src="https://img.shields.io/badge/Next.js%2015-Frontend-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" />
   <img src="https://img.shields.io/badge/TypeScript-Logic-3178C6?style=for-the-badge&logo=typescript&logoColor=white" />
-  <img src="https://img.shields.io/badge/Node.js-Backend-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" />
-  <img src="https://img.shields.io/badge/SQLite-Database-003B57?style=for-the-badge&logo=sqlite&logoColor=white" />
+  <img src="https://img.shields.io/badge/Liveblocks-Collaboration-FF4F00?style=for-the-badge&logo=liveblocks&logoColor=white" />
+  <img src="https://img.shields.io/badge/Upstash-Redis-FF4438?style=for-the-badge&logo=upstash&logoColor=white" />
 </p>
 
 ---
@@ -24,103 +24,69 @@
 > **CODIVIR** is a premium, real-time collaborative **code editor and compiler**. It allows teams to write, synchronize, and execute code in over **28+ programming languages** simultaneously in a high-fidelity IDE environment.
 
 Whether you're:
-- 👩‍💻 **Pair programming in real-time**
+- 👩‍💻 **Pair programming with Live Presence**
 - 🚀 **Sharing live, executable snippets**
 - 🧠 **Teaching or learning together**
 - 💬 **Showcasing complex multi-file logic**
 
-CODIVIR makes it seamless, cinematic, and blazing fast ⚡
+CODIVIR is now **serverless-ready**, cinematic, and blazing fast ⚡
 
 ---
 
-### 🧩 Supported Languages
+### 🚀 Key Features
 
-- 🌐 **Web**: HTML, CSS, JavaScript (Live Preview Iframe)
-- ⚙️ **Systems**: C, C++, Rust, Go, Zig, Nim
-- 🐍 **Scripting**: Python, Ruby, Lua, Perl, PHP, Bash, R
-- ☕ **JVM**: Java, Kotlin, Scala, Groovy, Clojure
-- 💎 **Typed**: TypeScript, C#, Swift, Dart, F#
-- 🗄️ **Database & Functional**: SQL (SQLite), Haskell, Elixir, Julia, Erlang, OCaml
+*   **Liveblocks Collaboration**: Simultaneous editing with zero-latency synchronization, live cursor tracking, and presence indicators.
+*   **Next.js 15 Native**: Optimized for the latest Next.js 15 App Router architecture.
+*   **Dual-Pane IDE**: Toggle between a professional IDE layout for backend languages and a 2x2 grid for Web development (HTML/CSS/JS).
+*   **Sandboxed Execution**: Powered by **Judge0 CE**, supporting the most popular and reliable programming languages.
+*   **Instant Sharing**: Share your workspace instantly with unique hex-based URLs.
+*   **Serverless Persistence**: Powered by **Upstash Redis** with JSON-serialized storage and 48-hour auto-expiration.
+*   **Aesthetic UI**: Cinematic glassmorphism, smooth Framer Motion animations, and a branded loading sequence.
 
----
+## 🛠️ Technical Stack
 
-### 📂 Folder Blueprint
+*   **Frontend**: Next.js 15 (App Router), React 19, Framer Motion, Tailwind CSS.
+*   **Editor**: Monaco Editor (VS Code core).
+*   **Collaboration**: Liveblocks (Presence, Storage, Broadcast).
+*   **Storage**: Upstash Redis (Serverless-ready JSON store).
+*   **Execution**: Judge0 CE API (Base64 UTF-8 payloads).
 
-```plaintext
-📁 CODIVIR/
-├── 📂 src/ app/           # Next.js Frontend
-│   ├── 📂 components/      # EditorComponent (Monaco + Judge0 Logic)
-│   ├── 📄 page.tsx         # Branded Landing Page
-│   └── 📄 globals.css      # IDE Styling & Custom Themes
-├── 📂 backend/            # Express + Socket.io Server
-│   ├── 📄 server.js        # Real-time sync & SQLite persistence
-│   └── 📄 database.sqlite  # Local database storage
-├── 📄 package.json
-└── 📄 README.md
-```
+## 🏗️ Workflow: How it Works
 
----
+1.  **Open Lab**: Start with a fresh editor or load an existing snippet.
+2.  **Invite Team**: Share your URL to collaborate instantly with real-time cursor tracking.
+3.  **Code & Sync**: Every keystroke is synced via Liveblocks. Presence indicators show who is typing in which pane.
+4.  **Run & Ship**: Hit `Ctrl + Enter` to execute backend code via Judge0 or see live Web previews. Storage is persistent for 48 hours via Redis.
 
-### 🛠️ Tech Stack & Workflow
+## ⚙️ Getting Started (Local)
 
-* **Frontend**: Next.js 15 (App Router), React 19, Framer Motion (Animations).
-* **Editor**: Monaco Editor (The core of VS Code).
-* **Real-time**: Socket.io for live cursor/sync and typing indicators.
-* **Execution**: **Judge0 CE API** — Sandboxed execution with Base64 encoding.
-* **Persistence**: SQLite for lightweight, transient snippet storage.
+1.  **Clone & Install**:
+    ```bash
+    git clone [repository-url]
+    npm install
+    ```
+2.  **Environment Setup**:
+    Create `.env.local` in the root:
+    ```env
+    REDIS_URL="your-upstash-url"
+    REDIS_TOKEN="your-upstash-token"
+    LIVEBLOCKS_TOKEN="your-liveblocks-secret-key"
+    ```
+3.  **Run**:
+    ```bash
+    npm run dev
+    ```
 
----
+## ☁️ Hosting Strategy (FREE)
 
-### ⚡ Implemented Features
-
- * ✅ **28+ Language Support** with specialized IDE vs Web layouts.
- * ✅ **Real-time Cursor Sync** & "Dev_XXX" name labels.
- * ✅ **Typing Indicators** per language pane.
- * ✅ **Live Web Preview** with instant refresh.
- * ✅ **Integrated Terminal** capturing `stdout` and `stderr`.
- * ✅ **Branded Page Loader** and high-fidelity UI animations.
- * ✅ **Snippet Persistence** using unique 8-character hex IDs.
-
----
-
-### 🚀 Getting Started (How to Run)
-
-#### **1. Clone the Repository**
-```bash
-git clone https://github.com/Cipher-Shadow-IR/codivir.git
-cd ir-code-sharing
-```
-
-#### **2. Backend Setup**
-Navigate to the `backend` folder and start the Socket.io server.
-```bash
-cd backend
-npm install
-npm run dev
-```
-*The backend runs on `http://localhost:8080` by default.*
-
-#### **3. Frontend Setup**
-In a new terminal window, navigate back to the root and start the Next.js dev server.
-```bash
-npm install
-npm run dev
-```
-*The app will be available at `http://localhost:3000`.*
+*   **Deployment**: Deploy the entire application to **Vercel** with zero backend configuration needed.
+*   **Database**: **Upstash Redis** (Global Free Tier).
+*   **Collaboration**: **Liveblocks** (Free Tier).
 
 ---
-
-### 🙌 Credits
-
-* **Ishaan Ray (Cipher Shadow IR)** – Design, Code & Vision
-* **Next.js, Tailwind, Monaco, SQLite** – Core technologies
-* **Judge0** – Powering the world-class code execution engine
-
----
-
+Developed with ⚡ by Ishaan Ray.
 <p align="center">
   <img src="https://img.icons8.com/fluency/48/code-file.png" /><br><br>
   <b>Code Together. Build Better.</b><br>
   <i>~ CODIVIR by Ishaan Ray</i>
 </p>
-

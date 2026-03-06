@@ -1,14 +1,20 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
 
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import { useState, useEffect, useRef, useCallback } from "react";
 import Editor from "@monaco-editor/react";
 import { Sun, Moon, Play, Loader2, Share2, Clock, CheckCircle, XCircle } from "lucide-react";
-import { io, Socket } from "socket.io-client";
+import { 
+  useStorage, 
+  useMutation, 
+  useMyPresence, 
+  useUpdateMyPresence, 
+  useOthers,
+  useStatus 
+} from "@/lib/liveblocks";
+import { shallow } from "@liveblocks/client";
 import "../globals.css";
-
-const BASE_URL = process.env.NEXT_PUBLIC_BACKEND_URL || "http://localhost:8080";
 
 /* ─── Language Registry ──────────────────────────────────────── */
 type LC = { display: string; monaco: string; judge0Id: number | null; group: string; template: string };
@@ -36,6 +42,13 @@ const msg = document.createElement('h2');
 msg.textContent = '⚡ JS is live!';
 msg.style.cssText = 'color:#fbbf24;font-family:sans-serif;text-align:center;margin-top:30vh';
 document.body.appendChild(msg);` },
+  typescript: { display: "TypeScript", monaco: "typescript", judge0Id: 74, group: "Web",
+    template: `type Person = { name: string; age: number };
+const greet = ({ name, age }: Person): void => {
+  console.log(\`Hello, I'm \${name}, \${age} years old.\`);
+};
+greet({ name: "Alice", age: 25 });
+console.log("Powered by CODIVIR ⚡");` },
 
   /* Scripting */
   python: { display: "Python", monaco: "python", judge0Id: 71, group: "Scripting",
@@ -50,53 +63,12 @@ document.body.appendChild(msg);` },
 p = Person("Alice", 25)
 p.greet()
 print("Powered by CODIVIR ⚡")` },
-  ruby: { display: "Ruby", monaco: "ruby", judge0Id: 72, group: "Scripting",
-    template: `class Person
-  attr_reader :name, :age
-  def initialize(name, age) = @name, @age = name, age
-  def greet = puts "Hello, I'm #{@name}, #{@age} years old."
-end
-Person.new("Alice", 25).greet
-puts "Powered by CODIVIR ⚡"` },
-  lua: { display: "Lua", monaco: "lua", judge0Id: 64, group: "Scripting",
-    template: `function greet(name, age)
-  print(string.format("Hello, I'm %s, %d years old.", name, age))
-end
-greet("Alice", 25)
-print("Powered by CODIVIR ⚡")` },
-  perl: { display: "Perl", monaco: "perl", judge0Id: 85, group: "Scripting",
-    template: `#!/usr/bin/perl
-use strict; use warnings;
-my %p = (name => "Alice", age => 25);
-printf "Hello, I'm %s, %d years old.\\n", $p{name}, $p{age};
-print "Powered by CODIVIR ⚡\\n";` },
-  php: { display: "PHP", monaco: "php", judge0Id: 68, group: "Scripting",
-    template: `<?php
-class Person {
-    public function __construct(public string $name, public int $age) {}
-    public function greet(): void {
-        echo "Hello, I'm {$this->name}, {$this->age} years old.\\n";
-    }
-}
-(new Person("Alice", 25))->greet();
-echo "Powered by CODIVIR ⚡\\n";` },
   bash: { display: "Bash", monaco: "shell", judge0Id: 46, group: "Scripting",
     template: `#!/bin/bash
 NAME="Alice"; AGE=25
 echo "Hello, I'm $NAME, $AGE years old."
 echo "Powered by CODIVIR ⚡"
 for i in {1..3}; do echo "  → step $i"; done` },
-  r: { display: "R", monaco: "r", judge0Id: 80, group: "Scripting",
-    template: `greet <- function(name, age) {
-  cat(sprintf("Hello, I'm %s, %d years old.\\n", name, age))
-}
-greet("Alice", 25)
-cat("Powered by CODIVIR ⚡\\n")` },
-  coffeescript: { display: "CoffeeScript", monaco: "coffeescript", judge0Id: null, group: "Scripting",
-    template: `greet = (name, age) ->
-  console.log "Hello, I'm #{name}, #{age} years old."
-greet "Alice", 25
-console.log "Powered by CODIVIR ⚡"` },
 
   /* Systems */
   c: { display: "C", monaco: "c", judge0Id: 50, group: "Systems",
@@ -144,24 +116,9 @@ func main() {
     Person{"Alice", 25}.Greet()
     fmt.Println("Powered by CODIVIR ⚡")
 }` },
-  zig: { display: "Zig", monaco: "plaintext", judge0Id: 91, group: "Systems",
-    template: `const std = @import("std");
-pub fn main() !void {
-    const stdout = std.io.getStdOut().writer();
-    try stdout.print("Hello from Zig!\\n", .{});
-    try stdout.print("Powered by CODIVIR ⚡\\n", .{});
-}` },
-  nim: { display: "Nim", monaco: "plaintext", judge0Id: null, group: "Systems",
-    template: `type Person = object
-  name: string; age: int
-proc greet(p: Person) =
-  echo "Hello, I'm ", p.name, ", ", p.age, " years old."
-let p = Person(name: "Alice", age: 25)
-p.greet()
-echo "Powered by CODIVIR ⚡"` },
 
-  /* JVM */
-  java: { display: "Java", monaco: "java", judge0Id: 62, group: "JVM",
+  /* JVM & Mobile */
+  java: { display: "Java", monaco: "java", judge0Id: 62, group: "JVM & Mobile",
     template: `public class Main {
     record Person(String name, int age) {
         void greet() { System.out.printf("Hello, I'm %s, %d years old.%n", name, age); }
@@ -171,7 +128,7 @@ echo "Powered by CODIVIR ⚡"` },
         System.out.println("Powered by CODIVIR ⚡");
     }
 }` },
-  kotlin: { display: "Kotlin", monaco: "kotlin", judge0Id: 78, group: "JVM",
+  kotlin: { display: "Kotlin", monaco: "kotlin", judge0Id: 78, group: "JVM & Mobile",
     template: `data class Person(val name: String, val age: Int) {
     fun greet() = println("Hello, I'm $name, $age years old.")
 }
@@ -179,31 +136,7 @@ fun main() {
     Person("Alice", 25).greet()
     println("Powered by CODIVIR ⚡")
 }` },
-  scala: { display: "Scala", monaco: "scala", judge0Id: 81, group: "JVM",
-    template: `@main def run(): Unit =
-  case class Person(name: String, age: Int):
-    def greet() = println(s"Hello, I'm $name, $age years old.")
-  Person("Alice", 25).greet()
-  println("Powered by CODIVIR ⚡")` },
-  groovy: { display: "Groovy", monaco: "plaintext", judge0Id: 86, group: "JVM",
-    template: `def person = [name: 'Alice', age: 25]
-println "Hello, I'm \${person.name}, \${person.age} years old."
-println "Powered by CODIVIR ⚡"` },
-  clojure: { display: "Clojure", monaco: "clojure", judge0Id: 86, group: "JVM",
-    template: `(defn greet [name age]
-  (println (str "Hello, I'm " name ", " age " years old.")))
-(greet "Alice" 25)
-(println "Powered by CODIVIR ⚡")` },
-
-  /* Typed */
-  typescript: { display: "TypeScript", monaco: "typescript", judge0Id: 74, group: "Typed",
-    template: `type Person = { name: string; age: number };
-const greet = ({ name, age }: Person): void => {
-  console.log(\`Hello, I'm \${name}, \${age} years old.\`);
-};
-greet({ name: "Alice", age: 25 });
-console.log("Powered by CODIVIR ⚡");` },
-  csharp: { display: "C#", monaco: "csharp", judge0Id: 51, group: "Typed",
+  csharp: { display: "C#", monaco: "csharp", judge0Id: 51, group: "JVM & Mobile",
     template: `using System;
 record Person(string Name, int Age) {
     public void Greet() => Console.WriteLine($"Hello, I'm {Name}, {Age} years old.");
@@ -214,13 +147,13 @@ class Program {
         Console.WriteLine("Powered by CODIVIR ⚡");
     }
 }` },
-  swift: { display: "Swift", monaco: "swift", judge0Id: 83, group: "Typed",
+  swift: { display: "Swift", monaco: "swift", judge0Id: 83, group: "JVM & Mobile",
     template: `struct Person { var name: String; var age: Int
     func greet() { print("Hello, I'm \\(name), \\(age) years old.") }
 }
 Person(name: "Alice", age: 25).greet()
 print("Powered by CODIVIR ⚡")` },
-  dart: { display: "Dart", monaco: "dart", judge0Id: 90, group: "Typed",
+  dart: { display: "Dart", monaco: "dart", judge0Id: 90, group: "JVM & Mobile",
     template: `class Person {
   final String name; final int age;
   Person(this.name, this.age);
@@ -231,61 +164,26 @@ void main() {
   print('Powered by CODIVIR ⚡');
 }` },
 
-  /* Functional */
-  haskell: { display: "Haskell", monaco: "plaintext", judge0Id: 61, group: "Functional",
-    template: `data Person = Person { name :: String, age :: Int }
-greet :: Person -> String
-greet p = "Hello, I'm " ++ name p ++ ", " ++ show (age p) ++ " years old."
-main :: IO ()
-main = do
-  let p = Person "Alice" 25
-  putStrLn (greet p)
+  /* Functional & Data */
+  haskell: { display: "Haskell", monaco: "plaintext", judge0Id: 61, group: "Functional & Data",
+    template: `main = do
+  putStrLn "Hello from Haskell!"
   putStrLn "Powered by CODIVIR ⚡"` },
-  elixir: { display: "Elixir", monaco: "plaintext", judge0Id: 57, group: "Functional",
-    template: `defmodule Person do
-  defstruct name: "", age: 0
-  def greet(%Person{name: n, age: a}), do: IO.puts("Hello, I'm #{n}, #{a} years old.")
-end
-Person.greet(%Person{name: "Alice", age: 25})
+  elixir: { display: "Elixir", monaco: "plaintext", judge0Id: 57, group: "Functional & Data",
+    template: `IO.puts("Hello from Elixir!")
 IO.puts("Powered by CODIVIR ⚡")` },
-  julia: { display: "Julia", monaco: "julia", judge0Id: 65, group: "Functional",
-    template: `struct Person; name::String; age::Int; end
-greet(p::Person) = println("Hello, I'm $(p.name), $(p.age) years old.")
-greet(Person("Alice", 25))
+  julia: { display: "Julia", monaco: "julia", judge0Id: 65, group: "Functional & Data",
+    template: `println("Hello from Julia!")
 println("Powered by CODIVIR ⚡")` },
-  erlang: { display: "Erlang", monaco: "plaintext", judge0Id: 58, group: "Functional",
-    template: `-module(main).
--export([main/0]).
-main() ->
-    io:format("Hello from Erlang!~n"),
-    io:format("Powered by CODIVIR ⚡~n").` },
-  ocaml: { display: "OCaml", monaco: "plaintext", judge0Id: 65, group: "Functional",
-    template: `let () =
-  let name = "Alice" and age = 25 in
-  Printf.printf "Hello, I'm %s, %d years old.\\n" name age;
-  print_endline "Powered by CODIVIR ⚡"` },
-  fsharp: { display: "F#", monaco: "fsharp", judge0Id: 87, group: "Functional",
-    template: `type Person = { Name: string; Age: int }
-let greet p = printfn "Hello, I'm %s, %d years old." p.Name p.Age
-greet { Name = "Alice"; Age = 25 }
-printfn "Powered by CODIVIR ⚡"` },
-
-  /* Database */
-  sql: { display: "SQL", monaco: "sql", judge0Id: 82, group: "Database",
+  sql: { display: "SQL", monaco: "sql", judge0Id: 82, group: "Functional & Data",
     template: `-- SQLite
-CREATE TABLE persons (id INTEGER PRIMARY KEY, name TEXT, age INTEGER);
-INSERT INTO persons VALUES (1, 'Alice', 25);
-INSERT INTO persons VALUES (2, 'Bob', 30);
-SELECT * FROM persons WHERE age < 28;
-SELECT COUNT(*) as total FROM persons;` },
-
-  /* Misc */
-  brainfuck: { display: "Brainfuck", monaco: "plaintext", judge0Id: null, group: "Esoteric",
-    template: `++++++++[>++++[>++>+++>+++>+<<<<-]>+>+>->>+[<]<-]>>.>---.+++++++..+++.>>.<-.<.+++.------.--------.>>+.>++.` },
+CREATE TABLE co (name TEXT, val TEXT);
+INSERT INTO co VALUES ('CODIVIR', '⚡');
+SELECT * FROM co;` },
 };
 
-const WEB = ["html", "css", "javascript"];
-const GROUPS = ["Web", "Scripting", "Systems", "JVM", "Typed", "Functional", "Database", "Esoteric"];
+const WEB = ["html", "css", "javascript", "typescript"];
+const GROUPS = ["Web", "Scripting", "Systems", "JVM & Mobile", "Functional & Data"];
 
 /* ─── Pane Color Map ─────────────────────────────────────────── */
 const COLOR: Record<string, { dot: string; label: string; border: string; bg: string }> = {
@@ -298,8 +196,8 @@ const COLOR: Record<string, { dot: string; label: string; border: string; bg: st
   go:         { dot: "bg-cyan-400",   label: "text-cyan-400",   border: "border-cyan-500/25",   bg: "bg-cyan-500/8"   },
   java:       { dot: "bg-amber-500",  label: "text-amber-500",  border: "border-amber-500/25",  bg: "bg-amber-500/8"  },
   kotlin:     { dot: "bg-violet-400", label: "text-violet-400", border: "border-violet-500/25", bg: "bg-violet-500/8" },
-  cpp:        { dot: "bg-pink-400",   label: "text-pink-400",   border: "border-pink-500/25",   bg: "bg-pink-500/8"   },
   c:          { dot: "bg-blue-300",   label: "text-blue-300",   border: "border-blue-300/25",   bg: "bg-blue-300/8"   },
+  cpp:        { dot: "bg-pink-400",   label: "text-pink-400",   border: "border-pink-500/25",   bg: "bg-pink-500/8"   },
   csharp:     { dot: "bg-purple-400", label: "text-purple-400", border: "border-purple-500/25", bg: "bg-purple-500/8" },
   swift:      { dot: "bg-orange-300", label: "text-orange-300", border: "border-orange-300/25", bg: "bg-orange-300/8" },
   ruby:       { dot: "bg-rose-400",   label: "text-rose-400",   border: "border-rose-500/25",   bg: "bg-rose-500/8"   },
@@ -343,23 +241,81 @@ const decodeBase64Utf8 = (value?: string | null) => {
 /* ─── Component ──────────────────────────────────────────────── */
 export default function EditorComponent({ snippetId: propSnippetId = null, onSnippetIdChange }: EditorComponentProps) {
   /* State */
+  const lastSynced = useRef<Record<string, string>>({});
+  /* Liveblocks Storage & Presence */
+  const storageCodes = useStorage((root) => {
+    return Object.fromEntries(root.codes.entries());
+  }, shallow);
+  const storageLanguage = useStorage((root) => root.language);
+
+  const setStorageLanguage = useMutation(({ storage }, newLang: string) => {
+    storage.set("language", newLang);
+  }, []);
+  const updateStorageCode = useMutation(({ storage }, lang: string, code: string) => {
+    // @ts-ignore
+    const map = storage.get("codes");
+    if (map) {
+      map.set(lang, code);
+      console.log(`[Liveblocks] Local update sent: ${lang}`);
+    } else {
+      console.error("[Liveblocks] codes Map not found in storage!");
+    }
+  }, []);
+
+  const [myPresence, updateMyPresence] = useMyPresence();
+  const others = useOthers();
+  const status = useStatus();
+  const router = useRouter();
+
+  useEffect(() => {
+    console.log("[Liveblocks] Connection status:", status);
+  }, [status]);
+
+  /* Local State synced with Storage */
   const [codes, setCodes] = useState<Record<string, string>>(() =>
     Object.fromEntries(Object.entries(LANGS).map(([k, v]) => [k, v.template]))
   );
   const [language, setLanguage]   = useState("html");
-  const [snippetId, setSnippetId] = useState<string | null>(propSnippetId);
-  const [isEdited, setIsEdited]   = useState(false);
-  const [isTyping, setIsTyping]   = useState(false);
-  const [darkMode, setDarkMode]   = useState(true);
-  const [showPopup, setShowPopup] = useState(false);
-  const [typer, setTyper]         = useState<string | null>(null);
-  const [username, setUsername]   = useState("");
-  const [presence, setPresence]   = useState<Record<string, string>>({});
 
   useEffect(() => {
-    setUsername(`Dev_${Math.floor(Math.random() * 900) + 100}`);
-  }, []);
-  const [notification, setNotification] = useState<string | null>(null);
+    if (storageCodes) {
+      setCodes(prev => {
+        let changed = false;
+        const next = { ...prev };
+        for (const [k, v] of Object.entries(storageCodes)) {
+          // If remote value is different from local, update local
+          if (v !== prev[k]) {
+            console.log(`[Liveblocks] Remote update received for ${k}`);
+            next[k] = v;
+            changed = true;
+          }
+        }
+        return changed ? next : prev;
+      });
+    }
+  }, [storageCodes]);
+
+  useEffect(() => {
+    if (storageLanguage && storageLanguage !== language) {
+      setLanguage(storageLanguage);
+    }
+  }, [storageLanguage, language]);
+
+  const [snippetId, setSnippetId] = useState<string | null>(propSnippetId);
+
+  useEffect(() => {
+    console.log("[Liveblocks] Current Room ID:", snippetId ? `codivir-snippet-${snippetId}` : "codivir-scratchpad");
+  }, [snippetId]);
+  const [isEdited, setIsEdited]   = useState(false);
+  const [darkMode, setDarkMode]   = useState(true);
+  const [showPopup, setShowPopup] = useState(false);
+  const [username, setUsername]   = useState("");
+
+  useEffect(() => {
+    const newName = `Dev_${Math.floor(Math.random() * 900) + 100}`;
+    setUsername(newName);
+    updateMyPresence({ username: newName });
+  }, []); // Run once on mount
 
   /* Execution state */
   const [output,    setOutput]    = useState<string>("");
@@ -369,12 +325,10 @@ export default function EditorComponent({ snippetId: propSnippetId = null, onSni
   const [execMs,    setExecMs]    = useState<number | null>(null);
   const [hasRun,    setHasRun]    = useState(false);
 
-  const socketRef      = useRef<Socket | null>(null);
   const typingTimeout  = useRef<NodeJS.Timeout | null>(null);
-  const presenceTimers = useRef<Record<string, NodeJS.Timeout>>({});
 
   const isWebMode = WEB.includes(language);
-  const cfg        = LANGS[language];
+  const cfg = LANGS[language] || LANGS["html"];
 
   const readExecutionResult = (data: Judge0Response) => {
     const stdout = decodeBase64Utf8(data.stdout);
@@ -399,7 +353,7 @@ export default function EditorComponent({ snippetId: propSnippetId = null, onSni
 
   /* ── Code execution via Judge0 ── */
   const runCode = useCallback(async () => {
-    if (isWebMode || !cfg.judge0Id || isRunning) return;
+    if (isWebMode || !cfg || !cfg.judge0Id || isRunning) return;
     setIsRunning(true);
     setHasRun(true);
     setOutput("");
@@ -411,7 +365,7 @@ export default function EditorComponent({ snippetId: propSnippetId = null, onSni
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          source_code: encodeBase64Utf8(codes[language]),
+          source_code: encodeBase64Utf8(codes[language] || ""),
           language_id: cfg.judge0Id,
           stdin: encodeBase64Utf8(""),
         }),
@@ -439,7 +393,7 @@ export default function EditorComponent({ snippetId: propSnippetId = null, onSni
 
     const loadSnippet = async () => {
       try {
-        const res = await fetch(`${BASE_URL}/api/snippets/${propSnippetId}`);
+        const res = await fetch(`/api/snippet/${propSnippetId}`);
         if (!res.ok) return;
 
         const data = await res.json();
@@ -447,10 +401,19 @@ export default function EditorComponent({ snippetId: propSnippetId = null, onSni
 
         if (data.codes && typeof data.codes === "object") {
           setCodes(prev => ({ ...prev, ...data.codes }));
+          // Seed storage if empty
+          if (storageCodes && Object.keys(storageCodes).length === 0) {
+            for (const [l, c] of Object.entries(data.codes as Record<string, string>)) {
+              updateStorageCode(l, c);
+            }
+          }
         }
 
         if (typeof data.language === "string" && LANGS[data.language]) {
           setLanguage(data.language);
+          if (!storageLanguage) setStorageLanguage(data.language);
+        } else {
+          setLanguage("html");
         }
 
         if (data.theme === "dark" || data.theme === "light") {
@@ -482,13 +445,17 @@ export default function EditorComponent({ snippetId: propSnippetId = null, onSni
     const code = value ?? "";
     setCodes(prev => ({ ...prev, [lang]: code }));
     setIsEdited(true);
-    setIsTyping(true);
-    if (socketRef.current && snippetId) {
-      socketRef.current.emit("code-change", { id: snippetId, language: lang, code });
-      socketRef.current.emit("typing", { id: snippetId, username, language: lang });
-    }
+    
+    // Liveblocks Sync
+    lastSynced.current[lang] = code;
+    updateStorageCode(lang, code);
+    updateMyPresence({ isTyping: true, language: lang });
+
     if (typingTimeout.current) clearTimeout(typingTimeout.current);
-    typingTimeout.current = setTimeout(() => setIsTyping(false), 2000);
+    typingTimeout.current = setTimeout(() => {
+      updateMyPresence({ isTyping: false });
+    }, 2000);
+
     /* clear stale output when code changes */
     setHasRun(false);
   };
@@ -498,17 +465,27 @@ export default function EditorComponent({ snippetId: propSnippetId = null, onSni
     try {
       const payload = { codes, language, theme: darkMode ? "dark" : "light" };
       const res = await fetch(
-        snippetId ? `${BASE_URL}/api/snippets/${snippetId}` : `${BASE_URL}/api/snippets`,
-        { method: snippetId ? "PUT" : "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) }
+        snippetId ? `/api/snippet/${snippetId}` : `/api/snippet`,
+        { 
+          method: snippetId ? "PUT" : "POST", 
+          headers: { "Content-Type": "application/json" }, 
+          body: JSON.stringify(payload) 
+        }
       );
       if (!res.ok) throw new Error();
       const data = await res.json();
       if (data.id) {
+        const isNew = !snippetId;
         setSnippetId(data.id);
         onSnippetIdChange?.(data.id);
         navigator.clipboard.writeText(`${window.location.origin}/snippet/${data.id}`);
         setShowPopup(true);
         setTimeout(() => setShowPopup(false), 2500);
+
+        if (isNew) {
+          // If it was a scratchpad, redirect to the new snippet URL to join its specific room
+          router.push(`/snippet/${data.id}`);
+        }
       }
       setIsEdited(false);
     } catch { /* silent */ }
@@ -518,50 +495,42 @@ export default function EditorComponent({ snippetId: propSnippetId = null, onSni
   const handleLanguageChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const nl = e.target.value;
     setLanguage(nl);
+    setStorageLanguage(nl);
     setHasRun(false);
     setOutput(""); setStderr("");
+    updateMyPresence({ language: nl });
   };
 
-  /* ── Socket ── */
-  useEffect(() => {
-    socketRef.current = io(BASE_URL);
-    socketRef.current.on("connect", () => {
-      if (snippetId) socketRef.current?.emit("join-snippet", snippetId);
-    });
-    socketRef.current.on("code-update", (data) => {
-      if (isTyping && data.language === language) return;
-      setCodes(prev => ({ ...prev, [data.language]: data.code }));
-      if (!isWebMode && data.language !== language) {
-        setNotification(`Someone edited ${data.language.toUpperCase()}`);
-        setTimeout(() => setNotification(null), 3000);
-      }
-    });
-    socketRef.current.on("user-typing", (data: { username: string; language: string }) => {
-      setPresence(prev => ({ ...prev, [data.language]: data.username }));
-      if (presenceTimers.current[data.language]) clearTimeout(presenceTimers.current[data.language]);
-      presenceTimers.current[data.language] = setTimeout(() => {
-        setPresence(prev => { const s = { ...prev }; delete s[data.language]; return s; });
-      }, 3000);
-    });
-    return () => { socketRef.current?.disconnect(); };
-  }, [snippetId, language, isTyping, isWebMode]);
-
-  useEffect(() => {
-    if (snippetId && socketRef.current) socketRef.current.emit("join-snippet", snippetId);
-  }, [snippetId]);
+  /* ── Room state ── */
+  const typer = others
+    .filter(other => other.presence?.isTyping && other.presence?.language === language)
+    .map(other => other.presence?.username)
+    .filter(Boolean)
+    .join(", ");
 
   /* ── Pane header component ── */
   const PaneHeader = ({ lang, label, extra }: { lang: string; label?: string; extra?: React.ReactNode }) => {
     const c = lc(lang);
+    
+    // Find users currently looking at this language
+    const usersInLang = others.filter(other => other.presence?.language === lang);
+
     return (
       <div className={`flex items-center gap-2 px-3 py-1.5 border-b flex-shrink-0 ${c.bg} ${c.border}`}>
         <span className={`w-2 h-2 rounded-full flex-shrink-0 ${c.dot}`} />
         <span className={`text-[10px] font-mono font-bold uppercase tracking-widest ${c.label}`}>{label ?? LANGS[lang]?.display ?? lang}</span>
-        {presence[lang] && (
-          <span className="ml-auto flex items-center gap-1 text-[10px] bg-purple-600/80 text-white px-2 py-0.5 rounded-full whitespace-nowrap">
-            <span className="w-1 h-1 rounded-full bg-white" />{presence[lang]}
-          </span>
-        )}
+        
+        <div className="ml-auto flex items-center -space-x-1">
+          {usersInLang.map((other) => (
+            <div 
+              key={other.connectionId}
+              title={`${other.presence?.username ?? "Anonymous"}${other.presence?.isTyping ? " (typing...)" : ""}`}
+              className={`w-5 h-5 rounded-full border border-[#0c0c1a] flex items-center justify-center text-[10px] font-bold text-white bg-purple-600 transition-all ${other.presence?.isTyping ? "ring-2 ring-purple-400 animate-pulse" : ""}`}
+            >
+              {(other.presence?.username || "A")[0]}
+            </div>
+          ))}
+        </div>
         {extra}
       </div>
     );
@@ -582,9 +551,13 @@ export default function EditorComponent({ snippetId: propSnippetId = null, onSni
           {typer && (
             <span className="flex items-center gap-1.5 text-[11px] text-purple-400 font-mono truncate">
               <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse flex-shrink-0" />
-              <span className="truncate">{typer} typing…</span>
+              <span className="truncate max-w-[100px]">{typer} typing…</span>
             </span>
           )}
+          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded-full bg-white/5 border border-white/10 text-[9px] font-mono">
+             <span className={`w-1.5 h-1.5 rounded-full ${status === 'connected' ? 'bg-emerald-500' : status === 'connecting' ? 'bg-yellow-500' : 'bg-red-500'}`} />
+             <span className="text-gray-500 capitalize">{status}</span>
+          </div>
         </div>
 
         {/* Center: language selector (styled) */}
@@ -654,11 +627,11 @@ export default function EditorComponent({ snippetId: propSnippetId = null, onSni
         </div>
       </header>
 
-      {/* Notification bar */}
-      {notification && (
-        <div className="flex items-center justify-center gap-2 py-1.5 bg-purple-600/20 border-b border-purple-500/30 text-purple-300 text-xs font-mono flex-shrink-0">
+      {/* Notification bar (Simplified) */}
+      {others.length > 0 && (
+        <div className="flex items-center justify-center gap-2 py-1.5 bg-purple-600/10 border-b border-purple-500/20 text-purple-300 text-[10px] font-mono flex-shrink-0">
           <span className="w-1.5 h-1.5 rounded-full bg-purple-400 animate-pulse" />
-          {notification}
+          {others.length} developer{others.length > 1 ? 's' : ''} collaborating
         </div>
       )}
 

@@ -126,11 +126,11 @@ function FeatureCard({ icon: Icon, title, desc, color, delay }: { icon: React.El
 
 /* ─── Code Terminal ─────────────────────────────────── */
 const codeLines = [
-  { code: 'const collab = io("codivir.app");', color: '#a78bfa' },
-  { code: 'collab.emit("join-snippet", snippetId);', color: '#34d399' },
-  { code: 'collab.on("code-update", render);', color: '#60a5fa' },
-  { code: '// User Dev_412 started typing in CSS...', color: '#f59e0b', isComment: true },
-  { code: 'setPresence({ css: "Dev_412" });', color: '#f472b6' },
+  { code: 'import { useStorage } from "./liveblocks";', color: '#a78bfa' },
+  { code: 'const codes = useStorage(root => root.codes);', color: '#34d399' },
+  { code: '// Real-time sync active: Dev_412 is typing...', color: '#6b7280', isComment: true },
+  { code: 'updatePresence({ isTyping: true });', color: '#60a5fa' },
+  // { code: 'setPresence({ css: "Dev_412" });', color: '#f472b6' },
 ];
 
 function LiveTerminal() {
@@ -218,7 +218,7 @@ const TECH: { name: string; cat: 'Frontend' | 'Backend'; color: string }[] = [
   { name: 'Monaco Editor', cat: 'Frontend', color: '#0ea5e9' },
   { name: 'Node.js',       cat: 'Backend',  color: '#4ade80' },
   { name: 'Express.js',    cat: 'Backend',  color: '#d1d5db' },
-  { name: 'Socket.io',     cat: 'Backend',  color: '#25c2a0' },
+  { name: 'Liveblocks',   cat: 'Backend',  color: '#ffffff' },
   { name: 'SQLite3',       cat: 'Backend',  color: '#003B57' },
   { name: 'Judge0 AI',     cat: 'Backend',  color: '#f59e0b' },
 ];
@@ -392,7 +392,7 @@ export default function LandingPage() {
                 {words[wordIdx]}
               </motion.span>
             </AnimatePresence>
-            <span>in Real-time.</span>
+            <span>in Real-time with Liveblocks.</span>
           </div>
 
           <motion.p
@@ -505,7 +505,7 @@ export default function LandingPage() {
             {[
               { icon: Globe2, title: 'Global Presence System', desc: 'See who is typing and in which pane — Google-Docs style name labels float above every cursor.', color: '#a78bfa', delay: 0 },
               { icon: Code2, title: 'Web Trio Layout', desc: 'HTML, CSS, and JS panes live side-by-side with a real-time preview that updates on every keystroke.', color: '#34d399', delay: 0.1 },
-              { icon: Zap, title: 'Zero-Latency Socket Sync', desc: 'Powered by Socket.io — your changes travel at the speed of light to every connected collaborator.', color: '#60a5fa', delay: 0.2 },
+              { icon: Zap, title: 'Zero-Latency Liveblocks Sync', desc: 'Powered by Liveblocks — your changes travel at the speed of light to every connected collaborator via optimized storage.', color: '#60a5fa', delay: 0.2 },
               { icon: Users, title: 'Unique User Identities', desc: 'Every session generates a unique Dev_XXX handle so you always know who is in the room with you.', color: '#f472b6', delay: 0.3 },
               { icon: Terminal, title: 'Cross-Language Alerts', desc: 'Working in Python while your teammate edits CSS? Get notified in real-time so nothing slips past you.', color: '#f59e0b', delay: 0.4 },
               { icon: Zap, title: 'Instant Shareable Links', desc: 'One click generates a permanent URL. Share to anyone — they join the live session instantly.', color: '#f87171', delay: 0.5 },
@@ -528,7 +528,7 @@ export default function LandingPage() {
             {[
               { n: '01', title: 'Open Lab', desc: 'Launch a new session with a single click. Every session is private and isolated.' },
               { n: '02', title: 'Invite Team', desc: 'Share the unique URL with your teammates. They join the live editor instantly.' },
-              { n: '03', title: 'Code & Sync', desc: 'Write code in any language. Watch your teammate\'s cursor move in real-time.' },
+              { n: '03', title: 'Code & Sync', desc: 'Write code in any language. Watch your teammate\'s cursor and typing indicators in real-time.' },
               { n: '04', title: 'Run & Ship', desc: 'Execute your code on our high-speed Judge0 backend and see the output instantly.' },
             ].map((step, i) => (
               <motion.div

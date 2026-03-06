@@ -1,7 +1,12 @@
+import { CollaborativeRoom } from "../../components/CollaborativeRoom";
 import EditorComponent from "../../components/EditorComponent";
 
-export default function SnippetPage({ params }: { params: { id: string } }) {
-  const { id: snippetId } = params;
+export default async function SnippetPage({ params }: { params: Promise<{ id: string }> }) {
+  const { id: snippetId } = await params;
 
-  return <EditorComponent snippetId={snippetId} />;
+  return (
+    <CollaborativeRoom roomId={`codivir-snippet-${snippetId}`}>
+      <EditorComponent snippetId={snippetId} />
+    </CollaborativeRoom>
+  );
 }

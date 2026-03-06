@@ -1,7 +1,10 @@
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {
-  /* config options here */
+  env: {
+    LIVEBLOCKS_TOKEN: process.env.LIVEBLOCKS_TOKEN,
+    NEXT_PUBLIC_LIVEBLOCKS_TOKEN: process.env.LIVEBLOCKS_TOKEN,
+  },
 };
 
 export default nextConfig;
