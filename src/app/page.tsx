@@ -155,7 +155,7 @@ function LiveTerminal() {
         <div className="w-3 h-3 rounded-full bg-green-500/80" />
         <span className="ml-3 text-xs text-gray-500 font-mono">collaborative.js</span>
       </div>
-      <div className="p-6 font-mono text-sm leading-loose min-h-[200px]">
+      <div className="p-6 font-mono text-sm leading-loose min-h-200px">
         {codeLines.slice(0, visible).map((line, i) => (
           <motion.div
             key={i}
@@ -188,7 +188,7 @@ function StoryStep({ n, title, desc, delay }: { n: string; title: string; desc: 
       transition={{ duration: 0.7, delay, ease: [0.22, 1, 0.36, 1] }}
       className="flex gap-6 items-start"
     >
-      <div className="flex-shrink-0 w-12 h-12 rounded-full bg-purple-600/20 border border-purple-500/40 flex items-center justify-center text-purple-400 font-bold text-lg">
+      <div className="shrink-0 w-12 h-12 rounded-full bg-purple-600/20 border border-purple-500/40 flex items-center justify-center text-purple-400 font-bold text-lg">
         {n}
       </div>
       <div>
@@ -210,17 +210,16 @@ const STARS = Array.from({ length: 25 }, (_, i) => ({
 
 /* ─── Tech Stack Data ─────────────────────────────────── */
 const TECH: { name: string; cat: 'Frontend' | 'Backend'; color: string }[] = [
-  { name: 'Next.js 15',    cat: 'Frontend', color: '#ffffff' },
-  { name: 'React 19',      cat: 'Frontend', color: '#61dafb' },
-  { name: 'TypeScript',    cat: 'Frontend', color: '#3b82f6' },
-  { name: 'Tailwind CSS',  cat: 'Frontend', color: '#38bdf8' },
+  { name: 'Next.js 15', cat: 'Frontend', color: '#ffffff' },
+  { name: 'React 19', cat: 'Frontend', color: '#61dafb' },
+  { name: 'TypeScript', cat: 'Frontend', color: '#3b82f6' },
+  { name: 'Tailwind CSS', cat: 'Frontend', color: '#38bdf8' },
   { name: 'Framer Motion', cat: 'Frontend', color: '#e879f9' },
   { name: 'Monaco Editor', cat: 'Frontend', color: '#0ea5e9' },
-  { name: 'Node.js',       cat: 'Backend',  color: '#4ade80' },
-  { name: 'Express.js',    cat: 'Backend',  color: '#d1d5db' },
-  { name: 'Liveblocks',   cat: 'Backend',  color: '#ffffff' },
-  { name: 'SQLite3',       cat: 'Backend',  color: '#003B57' },
-  { name: 'Judge0 AI',     cat: 'Backend',  color: '#f59e0b' },
+  { name: 'Node.js', cat: 'Backend', color: '#4ade80' },
+  { name: 'Redis', cat: 'Backend', color: '#d1d5db' },
+  { name: 'Liveblocks', cat: 'Backend', color: '#ffffff' },
+  { name: 'Judge0 AI', cat: 'Backend', color: '#f59e0b' },
 ];
 
 /* ─── Page Loader ─────────────────────────────────────── */
@@ -234,7 +233,7 @@ function PageLoader({ onDone }: { onDone: () => void }) {
       initial={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.55, ease: 'easeInOut' }}
-      className="fixed inset-0 z-[200] flex flex-col items-center justify-center bg-[#070711]"
+      className="fixed inset-0 z-200 flex flex-col items-center justify-center bg-[#070711]"
     >
       {/* Outer glow orb */}
       <div className="absolute w-64 h-64 rounded-full" style={{ background: 'radial-gradient(circle, rgba(124,58,237,0.18) 0%, transparent 70%)' }} />
@@ -246,9 +245,9 @@ function PageLoader({ onDone }: { onDone: () => void }) {
       >
         <Image src="/resources/codivirlogo.png" alt="CODIVIR" width={140} height={46} className="object-contain" priority />
         {/* Progress bar */}
-        <div className="w-44 h-[2px] bg-white/8 rounded-full overflow-hidden">
+        <div className="w-44 h-2px bg-white/8 rounded-full overflow-hidden">
           <motion.div
-            className="h-full rounded-full bg-gradient-to-r from-purple-500 via-violet-400 to-pink-400"
+            className="h-full rounded-full bg-linear-to-r from-purple-500 via-violet-400 to-pink-400"
             initial={{ width: '0%' }}
             animate={{ width: '100%' }}
             transition={{ duration: 1.8, ease: [0.4, 0, 0.2, 1] }}
@@ -370,7 +369,7 @@ export default function LandingPage() {
                 className="block"
               >
                 {i === 1 ? (
-                  <span className="bg-gradient-to-r from-purple-400 via-violet-400 to-pink-400 bg-clip-text text-transparent">
+                  <span className="bg-linear-to-r from-purple-400 via-violet-400 to-pink-400 bg-clip-text text-transparent">
                     {word}
                   </span>
                 ) : word}
@@ -494,7 +493,7 @@ export default function LandingPage() {
       </section>
 
       {/* ── STORY: THE SOLUTION ── */}
-      <section className="py-16 sm:py-32 px-4 sm:px-6 bg-gradient-to-b from-purple-950/10 to-transparent">
+      <section className="py-16 sm:py-32 px-4 sm:px-6 bg-linear-to-b from-purple-950/10 to-transparent">
         <div className="max-w-7xl mx-auto">
           <SectionTitle
             eyebrow="02 — The Solution"
@@ -552,11 +551,11 @@ export default function LandingPage() {
       <section className="py-20 sm:py-40 px-4 sm:px-6 relative overflow-hidden">
         <motion.div
           animate={{ rotate: 360 }} transition={{ duration: 40, repeat: Infinity, ease: 'linear' }}
-          className="absolute -top-60 -right-60 w-[600px] h-[600px] rounded-full border border-purple-500/10"
+          className="absolute -top-60 -right-60 w-600px h-600px rounded-full border border-purple-500/10"
         />
         <motion.div
           animate={{ rotate: -360 }} transition={{ duration: 60, repeat: Infinity, ease: 'linear' }}
-          className="absolute -bottom-60 -left-60 w-[700px] h-[700px] rounded-full border border-purple-500/5"
+          className="absolute -bottom-60 -left-60 w-700px h-700px rounded-full border border-purple-500/5"
         />
         <div className="max-w-4xl mx-auto text-center relative z-10">
           <motion.h2
@@ -567,7 +566,7 @@ export default function LandingPage() {
             className="text-3xl sm:text-5xl md:text-7xl font-black tracking-tighter leading-tight mb-6 sm:mb-8"
           >
             Stop sharing{' '}
-            <span className="bg-gradient-to-br from-purple-400 to-pink-400 bg-clip-text text-transparent">
+            <span className="bg-linear-to-br from-purple-400 to-pink-400 bg-clip-text text-transparent">
               screenshots.
             </span>
             <br /> Start coding together.
@@ -585,7 +584,7 @@ export default function LandingPage() {
             <motion.button
               whileHover={{ scale: 1.06, boxShadow: '0 0 60px rgba(124,58,237,0.4)' }}
               whileTap={{ scale: 0.96 }}
-              className="inline-flex items-center gap-3 px-12 py-5 bg-gradient-to-r from-purple-600 to-violet-600 rounded-full text-xl font-bold shadow-2xl"
+              className="inline-flex items-center gap-3 px-12 py-5 bg-linear-to-r from-purple-600 to-violet-600 rounded-full text-xl font-bold shadow-2xl"
             >
               Open Your Lab <ArrowRight size={22} />
             </motion.button>
@@ -623,7 +622,7 @@ export default function LandingPage() {
                     onMouseEnter={e => (e.currentTarget.style.boxShadow = `0 0 16px ${t.color}25`)}
                     onMouseLeave={e => (e.currentTarget.style.boxShadow = `0 0 0 0 ${t.color}00`)}
                   >
-                    <span className="w-1.5 h-1.5 rounded-full flex-shrink-0" style={{ background: t.color }} />
+                    <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: t.color }} />
                     {t.name}
                   </motion.div>
                 ))}
@@ -651,14 +650,14 @@ export default function LandingPage() {
             {/* subtle hover glow */}
             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700 pointer-events-none" style={{ background: 'radial-gradient(circle at top, rgba(124,58,237,0.15) 0%, transparent 60%)' }} />
 
-            <div className="relative w-20 h-20 mx-auto mb-4 flex-shrink-0">
-              <div className="absolute inset-0 rounded-full bg-gradient-to-br from-purple-500 to-pink-500 blur-sm opacity-60" />
+            <div className="relative w-20 h-20 mx-auto mb-4 shrink-0">
+              <div className="absolute inset-0 rounded-full bg-linear-to-br from-purple-500 to-pink-500 blur-sm opacity-60" />
               <Image
                 src="/resources/Ishaan-Ray.png"
                 alt="Ishaan Ray"
                 width={80}
                 height={80}
-className="relative w-20 h-20 rounded-full object-cover object-top border-2 border-purple-500/50"                priority
+                className="relative w-20 h-20 rounded-full object-cover object-top border-2 border-purple-500/50" priority
               />
             </div>
 
