@@ -3,7 +3,7 @@
 </p>
 
 <p align="center">
-  <img src="https://readme-typing-svg.herokuapp.com?font=Cambria&size=28&duration=5000&color=00FFFF&center=true&vCenter=true&width=1000&height=70&lines=CODIVIR+-+Collaborative+Code+Sharing+Platform;Real-time+Multi-Language+Compiler;Built+with+Next.js,+TypeScript+%26+MySQL" alt="Typing SVG" />
+  <img src="https://readme-typing-svg.herokuapp.com?font=Cambria&size=28&duration=5000&color=00FFFF&center=true&vCenter=true&width=1000&height=70&lines=CODIVIR+-+Collaborative+Code+Sharing+Platform;Real-time+Multi-Language+Compiler;Built+with+Next.js,+TypeScript+%26+SQLite" alt="Typing SVG" />
 </p>
 
 <h2 align="center">💻 Code. Collaborate. Share. Instantly.</h2>
@@ -13,32 +13,34 @@
 <p align="center">
   <img src="https://img.shields.io/badge/Next.js-Frontend-000000?style=for-the-badge&logo=nextdotjs&logoColor=white" />
   <img src="https://img.shields.io/badge/TypeScript-Logic-3178C6?style=for-the-badge&logo=typescript&logoColor=white" />
-  <img src="https://img.shields.io/badge/TailwindCSS-Styling-38B2AC?style=for-the-badge&logo=tailwindcss&logoColor=white" />
-  <img src="https://img.shields.io/badge/MySQL-Database-4479A1?style=for-the-badge&logo=mysql&logoColor=white" />
+  <img src="https://img.shields.io/badge/Node.js-Backend-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" />
+  <img src="https://img.shields.io/badge/SQLite-Database-003B57?style=for-the-badge&logo=sqlite&logoColor=white" />
 </p>
 
 ---
 
 ### 💡 What Is CODIVIR?
 
-> **CODIVIR** is a real-time collaborative **code editor and compiler**, where you can  
-> write, share, and execute code in multiple languages — all from your browser.
+> **CODIVIR** is a premium, real-time collaborative **code editor and compiler**. It allows teams to write, synchronize, and execute code in over **28+ programming languages** simultaneously in a high-fidelity IDE environment.
 
 Whether you're:
-- 👩‍💻 **Debugging with a friend**
-- 🚀 **Sharing live code snippets**
-- 🧠 **Learning together**
-- 💬 or just **showcasing your projects**
+- 👩‍💻 **Pair programming in real-time**
+- 🚀 **Sharing live, executable snippets**
+- 🧠 **Teaching or learning together**
+- 💬 **Showcasing complex multi-file logic**
 
-CODIVIR makes it seamless, real-time, and fast ⚡
+CODIVIR makes it seamless, cinematic, and blazing fast ⚡
 
 ---
 
 ### 🧩 Supported Languages
 
-- 🧱 **HTML / CSS / JavaScript** – Real-time rendered output (live preview)
-- ⚙️ **TypeScript** – Transpiled + executed in browser
-- 🐍 **Python** – Executed in sandbox (soon with live interpreter support)
+- 🌐 **Web**: HTML, CSS, JavaScript (Live Preview Iframe)
+- ⚙️ **Systems**: C, C++, Rust, Go, Zig, Nim
+- 🐍 **Scripting**: Python, Ruby, Lua, Perl, PHP, Bash, R
+- ☕ **JVM**: Java, Kotlin, Scala, Groovy, Clojure
+- 💎 **Typed**: TypeScript, C#, Swift, Dart, F#
+- 🗄️ **Database & Functional**: SQL (SQLite), Haskell, Elixir, Julia, Erlang, OCaml
 
 ---
 
@@ -46,65 +48,73 @@ CODIVIR makes it seamless, real-time, and fast ⚡
 
 ```plaintext
 📁 CODIVIR/
-├── 📂 src/
-│   ├── 📂 app/
-│   │   ├── 📂 api/
-│   │   │   ├── 📂 snippets/
-│   │   │   │   ├── route.ts        # POST / GET for new snippets
-│   │   │   │   └── [id]/route.ts   # PUT / GET for specific snippet
-│   │   ├── 📄 page.tsx             # Homepage
-│   │   └── 📄 components/
-│   │       └── EditorComponent.tsx # Core Monaco Editor + Output system
-│   └── 📄 globals.css              # TailwindCSS + custom styling
+├── 📂 src/ app/           # Next.js Frontend
+│   ├── 📂 components/      # EditorComponent (Monaco + Judge0 Logic)
+│   ├── 📄 page.tsx         # Branded Landing Page
+│   └── 📄 globals.css      # IDE Styling & Custom Themes
+├── 📂 backend/            # Express + Socket.io Server
+│   ├── 📄 server.js        # Real-time sync & SQLite persistence
+│   └── 📄 database.sqlite  # Local database storage
 ├── 📄 package.json
-├── 🗄️ .env.local
-├── 🧱 next.config.js
-├── ⚙️ tsconfig.json
 └── 📄 README.md
-````
+```
 
 ---
 
-### 🛠️ Under the Hood
+### 🛠️ Tech Stack & Workflow
 
-* **Next.js (App Router)** – Lightning-fast full-stack framework
-* **TypeScript** – Strongly typed and clean logic
-* **Monaco Editor** – Same core editor that powers VS Code
-* **TailwindCSS** – Unified styling through utility classes only
-* **MySQL** – Snippet persistence and live sync
-* **Lucide Icons + ShadCN UI** – Beautiful UI components
-
----
-
-### ⚡ Features
-
-✅ **Multi-language support** (HTML, CSS, JS, TS, Python)
-✅ **Individual code state per language** (no code overwrite)
-✅ **Live preview output** (auto-updating iframe)
-✅ **Snippet sharing** via unique URLs
-✅ **Dark / Light themes**
-✅ **Mobile-friendly toggle between editor & output**
-✅ **Auto-sync and save system**
+* **Frontend**: Next.js 15 (App Router), React 19, Framer Motion (Animations).
+* **Editor**: Monaco Editor (The core of VS Code).
+* **Real-time**: Socket.io for live cursor/sync and typing indicators.
+* **Execution**: **Judge0 CE API** — Sandboxed execution with Base64 encoding.
+* **Persistence**: SQLite for lightweight, transient snippet storage.
 
 ---
 
-### 🔭 Roadmap
+### ⚡ Implemented Features
 
-🚧 **Upcoming Additions**
+ * ✅ **28+ Language Support** with specialized IDE vs Web layouts.
+ * ✅ **Real-time Cursor Sync** & "Dev_XXX" name labels.
+ * ✅ **Typing Indicators** per language pane.
+ * ✅ **Live Web Preview** with instant refresh.
+ * ✅ **Integrated Terminal** capturing `stdout` and `stderr`.
+ * ✅ **Branded Page Loader** and high-fidelity UI animations.
+ * ✅ **Snippet Persistence** using unique 8-character hex IDs.
 
-* 🧠 Real-time multi-user editing via WebSockets
-* 🐍 Python + C/C++ live execution using backend runtime
-* 📜 Version history & forking system
-* 🎨 Customizable themes & syntax highlighting packs
-* 🔗 Cloud sync with GitHub integration
+---
+
+### 🚀 Getting Started (How to Run)
+
+#### **1. Clone the Repository**
+```bash
+git clone https://github.com/Cipher-Shadow-IR/codivir.git
+cd ir-code-sharing
+```
+
+#### **2. Backend Setup**
+Navigate to the `backend` folder and start the Socket.io server.
+```bash
+cd backend
+npm install
+npm run dev
+```
+*The backend runs on `http://localhost:8080` by default.*
+
+#### **3. Frontend Setup**
+In a new terminal window, navigate back to the root and start the Next.js dev server.
+```bash
+npm install
+npm run dev
+```
+*The app will be available at `http://localhost:3000`.*
 
 ---
 
 ### 🙌 Credits
 
 * **Ishaan Ray (Cipher Shadow IR)** – Design, Code & Vision
-* **Next.js, Tailwind, Monaco, MySQL** – Core technologies that power it
-* **Curiosity + Creativity** – For turning an idea into reality 💡
+* **Next.js, Tailwind, Monaco, SQLite** – Core technologies
+* **Judge0** – Powering the world-class code execution engine
 
 ---
 
