@@ -1,6 +1,23 @@
-import { Redis } from '@upstash/redis'
+import Redis from 'ioredis';
 
-export const redis = new Redis({
-  url: process.env.REDIS_URL || '',
-  token: process.env.REDIS_TOKEN || '',
-})
+const redisUrl = process.env.REDIS_URL;
+
+if (!redisUrl) {
+  console.warn('REDIS_URL environment variable is missing');
+}
+
+const getRedisClient = () => {
+  return new Redis(redisUrl || '', {
+    maxRetriesPerRequest: 3,
+  });
+};
+
+const globalForRedis = globalThis as unknown as {
+  redis: Redis | undefined;
+};
+
+export const redis = globalForRedis.redis ?? getRedisClient();
+
+if (process.env.NODE_ENV !== 'production') {
+  globalForRedis.redis = redis;
+}

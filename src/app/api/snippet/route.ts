@@ -17,7 +17,7 @@ export async function POST(req: Request) {
       theme: body.theme || "light"
     };
 
-    await redis.set(`snippet:${id}`, JSON.stringify(snippetData), { ex: 172800 });
+    await redis.set(`snippet:${id}`, JSON.stringify(snippetData), 'EX', 172800);
 
     return NextResponse.json({ id });
   } catch (err) {
